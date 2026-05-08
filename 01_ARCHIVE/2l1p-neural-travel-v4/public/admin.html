@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin</title>
+</head>
+
+<body>
+
+<h1>Offers</h1>
+
+<div id="offers"></div>
+
+<script>
+
+fetch("/api/offers")
+.then(r=>r.json())
+.then(data=>{
+
+let html="";
+
+data.forEach(o=>{
+
+html+=`
+<div>
+
+${o.clientName} — ${o.destination} — ${o.price}€
+
+Status: ${o.status}
+
+Viewed: ${o.viewed}
+
+<a href="/offer.html?id=${o.id}">Open</a>
+
+</div>
+<hr>
+`;
+
+});
+
+document.getElementById("offers").innerHTML=html;
+
+});
+
+</script>
+
+</body>
+</html>

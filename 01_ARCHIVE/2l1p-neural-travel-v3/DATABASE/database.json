@@ -1,0 +1,10 @@
+{
+  "offers": [],
+  "stats": {
+    "totalOffers": 0,
+    "bookedOffers": 0,
+    "cancelledOffers": 0,
+    "totalRevenue": 0,
+    "totalMargin": 0
+  }
+}

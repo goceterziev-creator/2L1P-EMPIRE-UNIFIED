@@ -1,0 +1,23 @@
+{
+  "name": "neural-payment-system",
+  "version": "1.0.0",
+  "description": "💳 Neural Payment System - 2L1P Empire",
+  "main": "BACKEND/payment-server.js",
+  "scripts": {
+    "start": "node BACKEND/payment-server.js",
+    "dev": "nodemon BACKEND/payment-server.js"
+  },
+  "keywords": ["payment", "stripe", "neural", "2l1p"],
+  "author": "2L1P Empire",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "stripe": "^13.3.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "body-parser": "^1.20.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2L1P ИМПЕРИЯ | NEURAL TRAVEL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .flight-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .flight-airline {
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .flight-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .flight-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+        }
+
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+        }
+
+        .user-message {
+            text-align: right;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+        }
+
+        .ai-message .message-content {
+            background: white;
+            color: #333;
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+            border: 1px solid #e0e0e0;
+        }
+
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+        }
+
+        .chat-input button {
+            width: auto;
+            padding: 12px 24px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+
+        .error {
+            color: #dc3545;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🌍 2L1P ИМПЕРИЯ | NEURAL TRAVEL</h1>
+            <div class="subtitle">Интелигентно пътуване с Amadeus и ПЕТЯ AI</div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>✈️ ОТ (град или IATA код)</label>
+                    <input type="text" id="origin" placeholder="София (SOF)" value="SOF">
+                </div>
+                <div class="form-group">
+                    <label>📍 ДО (град или IATA код)</label>
+                    <input type="text" id="destination" placeholder="Рим (ROM)" value="FCO">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>📅 ДАТА (НАЗЯМ)</label>
+                    <input type="date" id="departureDate" value="2026-05-22">
+                </div>
+                <div class="form-group">
+                    <label>👥 ПЪТНИЦИ</label>
+                    <input type="number" id="passengers" value="2" min="1" max="9">
+                </div>
+            </div>
+
+            <button onclick="searchFlights()">🔍 ТЪРСИ ПОЛЕТИ</button>
+        </div>
+
+        <div class="card">
+            <h3>✈️ НАЛИЧНИ ПОЛЕТИ</h3>
+            <div id="flightResults">
+                <p style="color: #999; text-align: center;">Въведете дестинация и дата</p>
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-header">
+                <h3>🤖 ПЕТЯ AI</h3>
+                <p>Вашият интелигентен асистент</p>
+                <div style="font-size: 12px; margin-top: 10px;">
+                    ✅ Мога да ви помогна с търсене на полети<br>
+                    🌍 Познавам всички градове в света<br>
+                    ✈️ Автоматично разпознавам IATA кодове
+                </div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="ai-message">
+                    <div class="message-content">
+                        👋 Здравейте! Аз съм ПЕТЯ.<br>
+                        Как мога да ви помогна днес?
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Напишете съобщение..." onkeypress="if(event.key==='Enter') askPetya()">
+                <button onclick="askPetya()">📤 Изпрати</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function searchFlights() {
+            const origin = document.getElementById('origin').value.toUpperCase();
+            const destination = document.getElementById('destination').value.toUpperCase();
+            const date = document.getElementById('departureDate').value;
+            const passengers = document.getElementById('passengers').value;
+
+            const resultsDiv = document.getElementById('flightResults');
+            resultsDiv.innerHTML = '<div class="loading">🔍 Търсене на полети...</div>';
+
+            try {
+                const response = await fetch('/api/travel/flights/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        origin: origin,
+                        destination: destination,
+                        date: date,
+                        adults: parseInt(passengers)
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.flights.length > 0) {
+                    let html = '';
+                    data.flights.forEach(flight => {
+                        html += `
+                            <div class="flight-card">
+                                <div class="flight-airline">✈️ ${flight.airline} - ${flight.flightNumber}</div>
+                                <div class="flight-info">
+                                    <span>🕐 От: ${flight.departureTime}</span>
+                                    <span>➡️</span>
+                                    <span>🕒 До: ${flight.arrivalTime}</span>
+                                </div>
+                                <div class="flight-price">💰 ${flight.price} ${flight.currency}</div>
+                            </div>
+                        `;
+                    });
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = '<div class="error">❌ Няма намерени полети</div>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="error">❌ Грешка при свързване със сървъра</div>';
+            }
+        }
+
+        async function askPetya() {
+            const input = document.getElementById('chatInput');
+            const question = input.value.trim();
+            if (!question) return;
+
+            const chatMessages = document.getElementById('chatMessages');
+            
+            // Добавяне на съобщението на потребителя
+            chatMessages.innerHTML += `
+                <div class="user-message">
+                    <div class="message-content">${question}</div>
+                </div>
+            `;
+            
+            input.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Добавяне на индикатор за писане
+            chatMessages.innerHTML += `
+                <div class="ai-message" id="typingIndicator">
+                    <div class="message-content">🤖 ПЕТЯ пише...</div>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/travel/petya/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: question })
+                });
+
+                const data = await response.json();
+                
+                // Премахване на индикатора за писане
+                document.getElementById('typingIndicator')?.remove();
+                
+                chatMessages.innerHTML += `
+                    <div class="ai-message">
+                        <div class="message-content">${data.message.replace(/\n/g, '<br>')}</div>
+                    </div>
+                `;
+                
+                // Ако ПЕТЯ е намерила полети, обновете резултатите
+                if (data.flights) {
+                    displayFlights(data.flights, passengers);
+}
+                
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } catch (error) {
+                document.getElementById('typingIndicator')?.remove();
+                chatMessages.innerHTML += `
+                    <div class="ai-message">
+                        <div class="message-content">❌ Грешка при комуникация със сървъра</div>
+                    </div>
+                `;
+            }
+        }
+
+function displayFlights(flights, passengers = 1) {
+    const resultsDiv = document.getElementById('flightResults');
+    
+    if (!flights || flights.length === 0) {
+        resultsDiv.innerHTML = '<p style="color: #999;">Няма намерени полети</p>';
+        return;
+    }
+    
+    let html = '';
+    flights.forEach(flight => {
+        const pricePerPerson = flight.pricePerPerson || Math.round(flight.price / passengers);
+        html += `
+            <div class="flight-card">
+                <div class="flight-airline">✈️ ${flight.airline} - ${flight.flightNumber}</div>
+                <div class="flight-info">
+                    <span>🕐 От: ${flight.departureTime}</span>
+                    <span>➡️</span>
+                    <span>🕒 До: ${flight.arrivalTime}</span>
+                </div>
+                <div class="flight-info">
+                    <span>💰 ${pricePerPerson} €/човек</span>
+                    <span>💵 ${flight.price} € общо</span>
+                </div>
+                ${flight.note ? `<div class="flight-info"><span>📌 ${flight.note}</span></div>` : ''}
+            </div>
+        `;
+    });
+    
+    resultsDiv.innerHTML = html;
+}
+
+        function displayFlights(flights) {
+            const resultsDiv = document.getElementById('flightResults');
+            let html = '';
+            flights.forEach(flight => {
+                html += `
+                    <div class="flight-card">
+                        <div class="flight-airline">✈️ ${flight.airline}</div>
+                        <div class="flight-info">
+                            <span>💰 ${flight.price} ${flight.currency}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            resultsDiv.innerHTML = html;
+        }
+
+        // Тестване на връзката
+        async function testConnection() {
+            try {
+                const response = await fetch('/api/status');
+                if (response.ok) {
+                    console.log('✅ Сървърът е онлайн');
+                }
+            } catch (error) {
+                console.log('❌ Сървърът не е достъпен');
+            }
+        }
+        
+        testConnection();
+    </script>
+</body>
+</html>

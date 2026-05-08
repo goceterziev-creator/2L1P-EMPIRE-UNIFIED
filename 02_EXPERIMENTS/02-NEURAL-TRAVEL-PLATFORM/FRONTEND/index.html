@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2L1P Пътования Система с ПЕТЯ AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        /* ПЕТЯ ПАНЕЛ - ВИНАГИ НА ВЪРХА! */
+        .petya-panel {
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            color: #2c3e50;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 3px solid #e67e22;
+            box-shadow: 0 5px 20px rgba(243, 156, 18, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .petya-panel::before {
+            content: "🧠";
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            font-size: 80px;
+            opacity: 0.1;
+            transform: rotate(10deg);
+        }
+        
+        .petya-panel h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 15px 0;
+            font-size: 1.6em;
+            font-weight: bold;
+        }
+        
+        .petya-message {
+            background: rgba(255,255,255,0.95);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 8px solid #e67e22;
+            font-size: 1.1em;
+            line-height: 1.6;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .petya-thinking {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            color: #2c3e50;
+            font-style: italic;
+            font-size: 1.1em;
+            padding: 10px;
+        }
+        
+        .petya-thinking.active {
+            display: flex;
+        }
+        
+        .petya-thinking .dot {
+            width: 10px;
+            height: 10px;
+            background: #2c3e50;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        
+        .petya-thinking .dot:nth-child(1) { animation-delay: -0.32s; }
+        .petya-thinking .dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        .petya-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        /* ТЪРСАЧКА */
+        .search-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .search-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+        
+        .flight-type {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .flight-type button {
+            background: #e0e0e0;
+            color: #333;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .flight-type button.active {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+        
+        .search-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        input, select {
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .search-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
+        
+        button.petya-btn {
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            color: #2c3e50;
+        }
+        
+        button.secondary {
+            background: #95a5a6;
+        }
+        
+        /* СЕКЦИИ */
+        .section-title {
+            color: #2c3e50;
+            margin: 30px 0 20px 0;
+            font-size: 1.8em;
+            border-bottom: 3px solid #f1c40f;
+            padding-bottom: 10px;
+        }
+        
+        .flight-section-title {
+            color: #3498db;
+            margin: 25px 0 15px 0;
+            font-size: 1.4em;
+            padding-left: 10px;
+            border-left: 5px solid #3498db;
+        }
+        
+        /* КАРТИЧКИ */
+        .flight-card, .hotel-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .flight-card:hover, .hotel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #3498db;
+        }
+        
+        .flight-card.selected, .hotel-card.selected {
+            background: #e8f5e8;
+            border: 3px solid #00b894;
+        }
+        
+        .petya-recommend {
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            color: #2c3e50;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(241, 196, 15, 0.3);
+            z-index: 10;
+            border: 2px solid white;
+        }
+        
+        .flight-card-content, .hotel-card-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .flight-info, .hotel-info {
+            flex: 2;
+            min-width: 250px;
+        }
+        
+        .flight-info strong {
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+        
+        .flight-details {
+            margin-top: 10px;
+            color: #666;
+        }
+        
+        .flight-details span {
+            display: inline-block;
+            margin-right: 15px;
+        }
+        
+        .price-section {
+            flex: 1;
+            min-width: 150px;
+            text-align: right;
+        }
+        
+        .price {
+            font-size: 32px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        
+        .currency {
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .rating {
+            color: #f1c40f;
+            font-size: 1.1em;
+            margin: 5px 0;
+        }
+        
+        /* ОФЕРТА */
+        .offer-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: #e8f5e8;
+            border-radius: 15px;
+            border: 2px solid #00b894;
+        }
+        
+        .offer-inputs {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .offer-inputs input {
+            flex: 2;
+            min-width: 250px;
+        }
+        
+        /* НОТИФИКАЦИИ */
+        .notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            padding: 18px 30px;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1em;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-left: 8px solid rgba(255,255,255,0.5);
+        }
+        
+        .notification.success { background: #00b894; }
+        .notification.error { background: #e74c3c; }
+        .notification.info { background: #3498db; }
+        .notification.petya { background: #f1c40f; color: #2c3e50; }
+        
+        .notification.show {
+            opacity: 1;
+        }
+        
+        /* ЛОАДИНГ */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* АДАПТИВНОСТ */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .flight-card-content { flex-direction: column; text-align: center; }
+            .price-section { text-align: center; }
+            .search-inputs { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; color: #2c3e50; margin-bottom: 30px;">
+            🎯 2L1P Система за Пътувания 
+            <span style="background: #f1c40f; color: #2c3e50; padding: 8px 18px; border-radius: 30px; font-size: 14px; margin-left: 15px; font-weight: bold;">С ПЕТЯ AI</span>
+        </h1>
+        
+        <!-- ПЕТЯ ПАНЕЛ - ВИНАГИ АКТИВНА -->
+        <div class="petya-panel">
+            <h3>
+                <span>🧠 ПЕТЯ AI КООРДИНАТОР</span>
+                <span style="background: #2c3e50; color: #f1c40f; padding: 5px 15px; border-radius: 25px; font-size: 14px;">АКТИВНА</span>
+            </h3>
+            
+            <div class="petya-message" id="petyaMessage">
+                👋 Здравей! Аз съм ПЕТЯ - твоят личен AI асистент за пътувания. 
+                Мога да ти помогна да намериш най-добрите оферти за полети и хотели,
+                да ти предложа романтични дестинации и да ти дам полезни съвети!
+            </div>
+            
+            <div class="petya-thinking" id="petyaThinking">
+                <span>🧠 ПЕТЯ анализира най-добрите опции за теб</span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+            
+            <div class="petya-buttons">
+                <button class="petya-btn" onclick="askPetya('romance')">💑 Романтични предложения</button>
+                <button class="petya-btn" onclick="askPetya('bestDeals')">💰 Най-добри оферти</button>
+                <button class="petya-btn" onclick="askPetya('tips')">✨ Пътнически съвети</button>
+            </div>
+        </div>
+        
+        <!-- ТЪРСАЧКА -->
+        <div class="search-section">
+            <h3>🔍 Търсене на полети и хотели</h3>
+            
+            <div class="flight-type">
+                <button id="oneWayBtn" onclick="setFlightType('oneway')">✈️ Еднопосочен</button>
+                <button id="roundTripBtn" onclick="setFlightType('roundtrip')" class="active">🔄 Двупосочен</button>
+            </div>
+            
+            <div class="search-inputs">
+                <input type="text" id="fromCityCode" placeholder="От град (код: SOF)" value="SOF">
+                <input type="text" id="toCityCode" placeholder="До град (код: IST)" value="IST">
+                <input type="date" id="departDate">
+                <input type="date" id="returnDate">
+            </div>
+            
+            <div class="search-buttons">
+                <button onclick="searchWithPetya()">🔍 Търси с ПЕТЯ</button>
+                <button class="secondary" onclick="searchAllRealTime()">🔍 Обикновено търсене</button>
+            </div>
+        </div>
+
+        <!-- ПОЛЕТИ -->
+        <div id="flights-section">
+            <h2 class="section-title">✈️ Намерени полети</h2>
+            <div id="flightsList">
+                <div class="loading" id="flightsLoading">
+                    <div class="loading-spinner"></div>
+                    <div>🔍 Натисни "Търси" за да видиш полети...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ХОТЕЛИ -->
+        <div id="hotels-section">
+            <h2 class="section-title">🏨 Намерени хотели</h2>
+            <div id="hotelsList">
+                <div class="loading" id="hotelsLoading">
+                    <div class="loading-spinner"></div>
+                    <div>🏨 Натисни "Търси" за да видиш хотели...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ОФЕРТА -->
+        <div class="offer-section">
+            <h2 style="color: #2c3e50; margin-bottom: 15px;">📧 Генериране на оферта</h2>
+            <div class="offer-inputs">
+                <input type="email" id="clientEmail" placeholder="Имейл на клиента" value="goce_terziev@abv.bg">
+                <button onclick="generateOffer()">📧 Генерирай оферта</button>
+                <button class="petya-btn" onclick="generateSmartOffer()">✨ Генерирай с ПЕТЯ</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== ПЕТЯ AI КЛАС ====================
+        class PetyaBrain {
+            constructor() {
+                this.name = "ПЕТЯ";
+                this.role = "MASTER_COORDINATOR";
+                this.memory = [];
+                this.tasks = [];
+            }
+
+            analyzeRequest(input) {
+                const analysis = {
+                    type: this.detectType(input),
+                    complexity: this.detectComplexity(input),
+                    keywords: this.extractKeywords(input),
+                    timestamp: new Date()
+                };
+                
+                this.memory.push(analysis);
+                return analysis;
+            }
+
+            detectType(input) {
+                const types = {
+                    travel: /пътуване|полет|хотел|почивка|дестинация|екскурзия/i,
+                    romance: /романтика|двойки|обич|сватба|меден месец|любов/i,
+                    deal: /оферта|цена|евтино|скъпо|намаление|промоция/i
+                };
+
+                for (let [type, pattern] of Object.entries(types)) {
+                    if (pattern.test(input)) return type;
+                }
+                return "general";
+            }
+
+            detectComplexity(input) {
+                return input.length > 100 ? "HIGH" : input.length > 50 ? "MEDIUM" : "LOW";
+            }
+
+            extractKeywords(input) {
+                return input.toLowerCase()
+                    .replace(/[^\w\s]/g, '')
+                    .split(/\s+/)
+                    .filter(w => w.length > 3);
+            }
+
+            getRecommendations(type, items, criteria = 'best') {
+                if (!items || items.length === 0) return [];
+                
+                if (type === 'hotel') {
+                    return items
+                        .map(h => ({ ...h, score: h.rating * 20 - h.price }))
+                        .sort((a, b) => b.score - a.score)
+                        .slice(0, 2);
+                }
+                
+                if (type === 'flight') {
+                    return [...items]
+                        .sort((a, b) => a.price - b.price)
+                        .slice(0, 2);
+                }
+                
+                return items.slice(0, 2);
+            }
+        }
+
+        // ==================== ПОМОЩНИ ФУНКЦИИ ====================
+        function getNextWeekDate() {
+            const d = new Date();
+            d.setDate(d.getDate() + 7);
+            return d.toISOString().split('T')[0];
+        }
+
+        function getTwoWeeksDate() {
+            const d = new Date();
+            d.setDate(d.getDate() + 14);
+            return d.toISOString().split('T')[0];
+        }
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        const petya = new PetyaBrain();
+        
+        const travelSystem = {
+            selectedDeparting: null,
+            selectedReturning: null,
+            selectedHotel: null,
+            flightType: 'roundtrip',
+            currentFlights: null,
+
+            getCityName(code) {
+                const cities = { 
+                    'SOF': 'София', 'IST': 'Истанбул', 'FCO': 'Рим', 
+                    'VAR': 'Варна', 'BOJ': 'Бургас', 'MILANO': 'Милано'
+                };
+                return cities[code] || code;
+            },
+
+            async searchFlights(from, to, depart, ret) {
+                const airlines = {
+                    'SOF-IST': ['Turkish Airlines', 'Pegasus Airlines', 'Bulgaria Air'],
+                    'SOF-MILANO': ['Turkish Airlines', 'Pegasus Airlines', 'Bulgaria Air', 'ITA Airways']
+                };
+                
+                const route = `${from}-${to}`;
+                const routeAirlines = airlines[route] || ['Turkish Airlines', 'Pegasus', 'Bulgaria Air'];
+                
+                const departing = [];
+                for (let i = 0; i < 4; i++) {
+                    departing.push({
+                        id: `dep-${i}-${Date.now()}`,
+                        airline: routeAirlines[i % routeAirlines.length],
+                        from, to, date: depart,
+                        price: Math.floor(80 + Math.random() * 70),
+                        currency: 'EUR',
+                        duration: from === 'SOF' && to === 'IST' ? '1ч 30м' : '2ч 15м',
+                        departureTime: `${Math.floor(6 + Math.random() * 12)}:${Math.floor(Math.random() * 60)}`,
+                        arrivalTime: `${Math.floor(6 + Math.random() * 12)}:${Math.floor(Math.random() * 60)}`
+                    });
+                }
+                
+                const returning = [];
+                if (ret && this.flightType === 'roundtrip') {
+                    for (let i = 0; i < 3; i++) {
+                        returning.push({
+                            id: `ret-${i}-${Date.now()}`,
+                            airline: routeAirlines[i % routeAirlines.length],
+                            from: to, to: from, date: ret,
+                            price: Math.floor(60 + Math.random() * 70),
+                            currency: 'EUR',
+                            duration: from === 'SOF' && to === 'IST' ? '1ч 30м' : '2ч 15м',
+                            departureTime: `${Math.floor(6 + Math.random() * 12)}:${Math.floor(Math.random() * 60)}`,
+                            arrivalTime: `${Math.floor(6 + Math.random() * 12)}:${Math.floor(Math.random() * 60)}`
+                        });
+                    }
+                }
+                
+                return { departing, returning };
+            },
+
+            async searchHotels(city) {
+                const hotels = {
+                    'Истанбул': [
+                        { id: 'ist1', name: 'Hilton Istanbul Bosphorus', price: 145, rating: 4.7, location: 'Султанехмет' },
+                        { id: 'ist2', name: 'Four Seasons Hotel', price: 320, rating: 4.9, location: 'Султанехмет' },
+                        { id: 'ist3', name: 'Radisson Blu Hotel', price: 95, rating: 4.2, location: 'Таксим' }
+                    ],
+                    'Милано': [
+                        { id: 'mil1', name: 'Hotel Principe di Savoia', price: 280, rating: 4.8, location: 'Център' },
+                        { id: 'mil2', name: 'NH Milano Palazzo Moscova', price: 150, rating: 4.4, location: 'Porta Nuova' },
+                        { id: 'mil3', name: 'Ibis Milano Centro', price: 85, rating: 4.0, location: 'Centrale' }
+                    ]
+                };
+                return hotels[city] || hotels['Истанбул'];
+            }
+        };
+
+        // ==================== ОСНОВНИ ФУНКЦИИ ====================
+        function setFlightType(type) {
+            travelSystem.flightType = type;
+            document.getElementById('oneWayBtn').classList.toggle('active', type === 'oneway');
+            document.getElementById('roundTripBtn').classList.toggle('active', type === 'roundtrip');
+            showNotification(type === 'oneway' ? '✅ Еднопосочен полет' : '✅ Двупосочен полет');
+        }
+
+        async function searchWithPetya() {
+            const from = document.getElementById('fromCityCode').value.toUpperCase();
+            const to = document.getElementById('toCityCode').value.toUpperCase();
+            const depart = document.getElementById('departDate').value;
+            const ret = document.getElementById('returnDate').value;
+
+            document.getElementById('petyaThinking').classList.add('active');
+            document.getElementById('petyaMessage').innerHTML = '🧠 ПЕТЯ търси най-добрите оферти за теб...';
+
+            try {
+                const flights = await travelSystem.searchFlights(from, to, depart, ret);
+                travelSystem.currentFlights = flights;
+                
+                const cityName = travelSystem.getCityName(to);
+                const hotels = await travelSystem.searchHotels(cityName);
+                
+                const recFlights = petya.getRecommendations('flight', flights.departing);
+                const recHotels = petya.getRecommendations('hotel', hotels);
+                
+                displayFlights(flights, recFlights);
+                displayHotels(hotels, recHotels);
+                
+                const cheapest = [...flights.departing].sort((a,b) => a.price - b.price)[0];
+                document.getElementById('petyaMessage').innerHTML = 
+                    `🎯 Намерих ${flights.departing.length} полета и ${hotels.length} хотела.<br>` +
+                    `✨ Най-евтин полет: ${cheapest.airline} за ${cheapest.price}€<br>` +
+                    `🏨 Препоръчвам: ${recHotels[0].name} (${recHotels[0].price}€/нощ)`;
+                
+                showNotification('✅ ПЕТЯ завърши търсенето!', 'petya');
+            } catch (error) {
+                document.getElementById('petyaMessage').innerHTML = '❌ Възникна грешка. Моля, опитай отново.';
+            } finally {
+                document.getElementById('petyaThinking').classList.remove('active');
+            }
+        }
+
+        async function searchAllRealTime() {
+            const from = document.getElementById('fromCityCode').value.toUpperCase();
+            const to = document.getElementById('toCityCode').value.toUpperCase();
+            const depart = document.getElementById('departDate').value;
+            const ret = document.getElementById('returnDate').value;
+
+            try {
+                const flights = await travelSystem.searchFlights(from, to, depart, ret);
+                travelSystem.currentFlights = flights;
+                
+                const cityName = travelSystem.getCityName(to);
+                const hotels = await travelSystem.searchHotels(cityName);
+                
+                displayFlights(flights);
+                displayHotels(hotels);
+                
+                showNotification('✅ Търсенето завърши успешно!');
+            } catch (error) {
+                showNotification('❌ Грешка при търсене', 'error');
+            }
+        }
+
+        function displayFlights(flights, recommendations = []) {
+            const list = document.getElementById('flightsList');
+            list.innerHTML = '';
+
+            const toCity = travelSystem.getCityName(flights.departing[0].to);
+
+            // Тръгващи
+            list.innerHTML += `<h3 class="flight-section-title">🛫 Тръгващи полети (София → ${toCity})</h3>`;
+            flights.departing.forEach(f => {
+                const isRec = recommendations.some(r => r && r.id === f.id);
+                list.innerHTML += `
+                    <div class="flight-card ${isRec ? 'selected' : ''}" onclick="selectFlight('${f.id}', 'departing')">
+                        ${isRec ? '<span class="petya-recommend">✨ ПЕТЯ препоръчва</span>' : ''}
+                        <div class="flight-card-content">
+                            <div class="flight-info">
+                                <strong>${f.airline}</strong>
+                                <div class="flight-details">
+                                    <span>✈️ ${f.from} → ${f.to}</span>
+                                    <span>📅 ${f.date}</span>
+                                    <span>🕐 ${f.departureTime} - ${f.arrivalTime}</span>
+                                    <span>⏱️ ${f.duration}</span>
+                                </div>
+                            </div>
+                            <div class="price-section">
+                                <div class="price">${f.price} <span class="currency">EUR</span></div>
+                                <button onclick="event.stopPropagation(); selectFlight('${f.id}', 'departing')">✅ Избери</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Връщащи
+            if (flights.returning?.length) {
+                list.innerHTML += `<h3 class="flight-section-title">🛬 Връщащи полети (${toCity} → София)</h3>`;
+                flights.returning.forEach(f => {
+                    list.innerHTML += `
+                        <div class="flight-card" onclick="selectFlight('${f.id}', 'returning')">
+                            <div class="flight-card-content">
+                                <div class="flight-info">
+                                    <strong>${f.airline}</strong>
+                                    <div class="flight-details">
+                                        <span>✈️ ${f.from} → ${f.to}</span>
+                                        <span>📅 ${f.date}</span>
+                                        <span>🕐 ${f.departureTime} - ${f.arrivalTime}</span>
+                                        <span>⏱️ ${f.duration}</span>
+                                    </div>
+                                </div>
+                                <div class="price-section">
+                                    <div class="price">${f.price} <span class="currency">EUR</span></div>
+                                    <button onclick="event.stopPropagation(); selectFlight('${f.id}', 'returning')">✅ Избери</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function displayHotels(hotels, recommendations = []) {
+            const list = document.getElementById('hotelsList');
+            list.innerHTML = '';
+
+            hotels.forEach(h => {
+                const isRec = recommendations.some(r => r && r.id === h.id);
+                list.innerHTML += `
+                    <div class="hotel-card ${isRec ? 'selected' : ''}" onclick="selectHotel('${h.id}')">
+                        ${isRec ? '<span class="petya-recommend">✨ ПЕТЯ препоръчва</span>' : ''}
+                        <div class="flight-card-content">
+                            <div class="hotel-info">
+                                <strong>${h.name}</strong>
+                                <div class="flight-details">
+                                    <span>📍 ${h.location}</span>
+                                    <span class="rating">⭐ ${h.rating}/5</span>
+                                </div>
+                            </div>
+                            <div class="price-section">
+                                <div class="price">${h.price} <span class="currency">EUR/нощ</span></div>
+                                <button onclick="event.stopPropagation(); selectHotel('${h.id}')">🏨 Избери</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function selectFlight(id, type) {
+            if (!travelSystem.currentFlights) return;
+            
+            const flight = type === 'departing' 
+                ? travelSystem.currentFlights.departing.find(f => f.id === id)
+                : travelSystem.currentFlights.returning.find(f => f.id === id);
+                
+            if (flight) {
+                if (type === 'departing') travelSystem.selectedDeparting = flight;
+                else travelSystem.selectedReturning = flight;
+                
+                showNotification(`✅ Избран ${type === 'departing' ? 'тръгващ' : 'връщащ'} полет: ${flight.airline} - ${flight.price}€`);
+                document.getElementById('petyaMessage').innerHTML = `👍 Отличен избор! ${flight.airline} е ${flight.price < 100 ? 'много добра оферта' : 'добър избор'}.`;
+            }
+        }
+
+        function selectHotel(id) {
+            const city = travelSystem.getCityName(document.getElementById('toCityCode').value);
+            travelSystem.searchHotels(city).then(hotels => {
+                const hotel = hotels.find(h => h.id === id);
+                if (hotel) {
+                    travelSystem.selectedHotel = hotel;
+                    showNotification(`✅ Избран хотел: ${hotel.name}`);
+                    document.getElementById('petyaMessage').innerHTML = `🏨 Чудесен избор! ${hotel.name} е ${hotel.price < 150 ? 'отлична стойност' : 'луксозен хотел'}.`;
+                }
+            });
+        }
+
+        function askPetya(type) {
+            document.getElementById('petyaThinking').classList.add('active');
+            
+            setTimeout(() => {
+                const city = travelSystem.getCityName(document.getElementById('toCityCode').value);
+                let msg = '';
+                
+                switch(type) {
+                    case 'romance':
+                        msg = `💑 За романтична почивка в ${city} препоръчвам луксозен хотел с изглед, вечерна разходка и вечеря на свещи.`;
+                        break;
+                    case 'bestDeals':
+                        msg = `💰 Най-добри оферти за ${city}: полети от 70€, хотели от 85€/нощ. Комбиниран пакет: 7 нощувки + полет от 550€!`;
+                        break;
+                    case 'tips':
+                        msg = `✨ Пътнически съвети за ${city}: носете си удобни обувки, опитайте местната кухня, пазете се от туристическите капани.`;
+                        break;
+                }
+                
+                document.getElementById('petyaMessage').innerHTML = msg;
+                document.getElementById('petyaThinking').classList.remove('active');
+            }, 1500);
+        }
+
+        function generateSmartOffer() {
+            const email = document.getElementById('clientEmail').value;
+            if (!email) return showNotification('❌ Въведете имейл!', 'error');
+            
+            document.getElementById('petyaThinking').classList.add('active');
+            
+            setTimeout(() => {
+                const ref = '2L1P-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                document.getElementById('petyaMessage').innerHTML = 
+                    `📧 ПЕТЯ генерира персонализирана оферта за ${email}<br>🆔 Референтен номер: ${ref}`;
+                showNotification(`✅ Оферта генерирана за ${email}!`, 'petya');
+                document.getElementById('petyaThinking').classList.remove('active');
+            }, 2000);
+        }
+
+        function generateOffer() {
+            const email = document.getElementById('clientEmail').value;
+            if (!email) return showNotification('❌ Въведете имейл!', 'error');
+            showNotification(`📧 Оферта генерирана за ${email}`);
+        }
+
+        function showNotification(msg, type = 'success') {
+            const notif = document.createElement('div');
+            notif.className = `notification ${type}`;
+            notif.textContent = msg;
+            document.body.appendChild(notif);
+            
+            setTimeout(() => notif.classList.add('show'), 100);
+            setTimeout(() => {
+                notif.classList.remove('show');
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+
+        // СТАРТ
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('departDate').value = getNextWeekDate();
+            document.getElementById('returnDate').value = getTwoWeeksDate();
+            console.log('✅ 2L1P TRAVEL с ПЕТЯ AI - ЗАРЕДЕНА И ГОТОВА!');
+        });
+    </script>
+</body>
+</html>
