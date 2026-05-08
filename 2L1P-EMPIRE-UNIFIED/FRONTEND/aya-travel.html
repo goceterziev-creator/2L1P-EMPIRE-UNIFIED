@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AYA Travel Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .results {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .results h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .flight-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-left: 4px solid #667eea;
+            transition: all 0.2s;
+        }
+
+        .flight-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .flight-airline {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .flight-number {
+            color: #666;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .flight-times {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .flight-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .price-per-person {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .error {
+            text-align: center;
+            padding: 30px;
+            color: #dc3545;
+            background: #f8d7da;
+            border-radius: 15px;
+        }
+
+        .no-flights {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+
+        @media (max-width: 600px) {
+            .row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 AYA Travel Assistant</h1>
+        <div class="subtitle">Вашият интелигентен асистент за пътуване</div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>✈️ От (град или IATA код)</label>
+                <input type="text" id="origin" placeholder="София / SOF" value="София">
+            </div>
+            <div class="form-group">
+                <label>📍 До (град или IATA код)</label>
+                <input type="text" id="destination" placeholder="Рим / FCO" value="Рим">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>📅 Дата</label>
+                <input type="date" id="date" value="2026-05-21">
+            </div>
+            <div class="form-group">
+                <label>👥 Пътници</label>
+                <input type="number" id="adults" value="2" min="1" max="9">
+            </div>
+        </div>
+
+        <button onclick="searchFlights()">🔍 Търси с AYA</button>
+
+        <div class="results" id="results">
+            <h3>✈️ Намерени полети</h3>
+            <div class="no-flights">👆 Въведете дестинация и натиснете "Търси"</div>
+        </div>
+    </div>
+
+    <script>
+        // Карта за преобразуване на градове в IATA кодове
+        const cityMap = {
+            'софия': 'SOF', 'sofia': 'SOF', 'sofija': 'SOF',
+            'рим': 'FCO', 'rome': 'FCO', 'roma': 'FCO',
+            'лондон': 'LON', 'london': 'LON',
+            'париж': 'PAR', 'paris': 'PAR',
+            'берлин': 'BER', 'berlin': 'BER',
+            'варна': 'VAR', 'varna': 'VAR',
+            'бургас': 'BOJ', 'burgas': 'BOJ',
+            'токио': 'HND', 'tokyo': 'HND', 'tokio': 'HND',
+            'истанбул': 'IST', 'istanbul': 'IST'
+        };
+
+        async function searchFlights() {
+            const resultsDiv = document.getElementById('results');
+            
+            // Показване на индикатор за зареждане
+            resultsDiv.innerHTML = '<h3>✈️ Намерени полети</h3><div class="loading">🔍 Търсене на полети...</div>';
+            
+            // Вземане на стойностите
+            let origin = document.getElementById('origin').value.trim().toLowerCase();
+            let destination = document.getElementById('destination').value.trim().toLowerCase();
+            const date = document.getElementById('date').value;
+            const adults = parseInt(document.getElementById('adults').value);
+            
+            // Преобразуване на градове към IATA кодове
+            origin = cityMap[origin] || origin.toUpperCase();
+            destination = cityMap[destination] || destination.toUpperCase();
+            
+            console.log('🔍 Търсене:', { origin, destination, date, adults });
+            
+            try {
+                const response = await fetch('https://twol1p-empire-unified.onrender.com/api/travel/flights/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        origin: origin,
+                        destination: destination,
+                        date: date,
+                        adults: adults
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP грешка: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('📦 Отговор от сървъра:', data);
+                
+                if (data.success && data.flights && data.flights.length > 0) {
+                    displayFlights(data.flights, adults);
+                } else {
+                    resultsDiv.innerHTML = `
+                        <h3>✈️ Намерени полети</h3>
+                        <div class="no-flights">
+                            ❌ Няма намерени полети от ${origin} до ${destination}<br>
+                            <small>Опитайте с друга дата или дестинация</small>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Грешка:', error);
+                resultsDiv.innerHTML = `
+                    <h3>✈️ Намерени полети</h3>
+                    <div class="error">
+                        ❌ Грешка при свързване със сървъра<br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+            }
+        }
+        
+        function displayFlights(flights, adults) {
+            const resultsDiv = document.getElementById('results');
+            
+            let html = '<h3>✈️ Намерени полети</h3>';
+            
+            flights.forEach(flight => {
+                const totalPrice = flight.price;
+                const pricePerPerson = flight.pricePerPerson || Math.round(totalPrice / adults);
+                
+                html += `
+                    <div class="flight-card">
+                        <div>
+                            <span class="flight-airline">✈️ ${flight.airline}</span>
+                            <span class="flight-number">${flight.flightNumber}</span>
+                        </div>
+                        <div class="flight-times">
+                            <span>🕐 Излитане: ${flight.departureTime}</span>
+                            <span>➡️</span>
+                            <span>🕒 Кацане: ${flight.arrivalTime}</span>
+                        </div>
+                        <div class="flight-price">💰 ${totalPrice} EUR</div>
+                        <div class="price-per-person">🏷️ ${pricePerPerson} EUR на човек</div>
+                        ${flight.note ? `<div style="font-size: 12px; color: #999; margin-top: 8px;">📌 ${flight.note}</div>` : ''}
+                    </div>
+                `;
+            });
+            
+            html += `<div style="text-align: center; margin-top: 15px; font-size: 12px; color: #999;">
+                ⚡ Данните са примерни (MOCK режим). За реални цени се свържете с нас.
+            </div>`;
+            
+            resultsDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
